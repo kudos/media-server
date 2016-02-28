@@ -1,0 +1,60 @@
+version: "2"
+services:
+  plex:
+    image: timhaak/plexpass
+    container_name: plex
+    network_mode: "host"
+    restart: unless-stopped
+    volumes:
+      - /var/lib/plexmediaserver:/config
+      - /mnt/storage/Media:/data
+  flexget:
+    image: pfragoso/docker-flexget
+    container_name: flexget
+    volumes:
+      - ~/.flexget/:/home/flexget/.flexget
+    restart: unless-stopped
+  emby:
+    image: dperson/emby
+    container_name: emby
+    environment:
+      - TZ=GMT
+    volumes:
+      - /etc/emby:/config
+      - /mnt/storage/Media:/media
+    ports:
+      - "8096:8096"
+      - "8920:8920"
+    restart: unless-stopped
+  sickbeard:
+    image: timhaak/sickbeard
+    container_name: sickbeard
+    volumes:
+      - /etc/sickbeard:/config
+      - /mnt/storage:/data
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+  sync:
+    image: bittorrent/sync
+    container_name: sync
+    restart: unless-stopped
+    volumes:
+      - /var/lib/btsync:/mnt/sync
+      - /mnt/storage:/mnt/mounted_folders/storage
+    ports:
+      - "8888:8888"
+      - "55555"
+  transmission:
+    image: elventear/transmission
+    container_name: transmission
+    environment:
+      - ADMIN_PASS=$TRANSMISSION_PASS
+    volumes:
+      - /mnt/storage/Torrents:/var/lib/transmission-daemon/downloads
+      - /mnt/storage/Incomplete:/var/lib/transmission-daemon/incomplete
+    ports:
+      - "12345:12345"
+      - "12345:12345/udp"
+      - "0.0.0.0:9091:9091"
+    restart: unless-stopped
