@@ -1,5 +1,18 @@
 version: "2"
 services:
+  timemachine:
+    image: odarriba/timemachine
+    container_name: timemachine
+    environment:
+      - AFP_LOGIN=jonathan
+      - AFP_PASSWORD
+      - AFP_NAME=TimeMachine
+      - AFP_SIZE_LIMIT=1000
+    volumes:
+      - /mnt/storage/TimeMachine:/timemachine
+    ports:
+      - "548:548"
+      - "636:636"
   plex:
     image: kudoz/plexpass
     container_name: plex
