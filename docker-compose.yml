@@ -1,47 +1,31 @@
-version: "2"
+version: "3"
 services:
-  timemachine:
-    image: odarriba/timemachine
-    container_name: timemachine
-    environment:
-      - AFP_LOGIN=jonathan
-      - AFP_PASSWORD
-      - AFP_NAME=TimeMachine
-      - AFP_SIZE_LIMIT=1000
-    volumes:
-      - /mnt/storage/TimeMachine:/timemachine
-    ports:
-      - "548:548"
-      - "636:636"
   plex:
-    image: kudoz/plexpass
+    build:
+      context: plex/
+      args:
+        VERSION: "1.5.3.3580-4b377d295"
     container_name: plex
     network_mode: "host"
     restart: unless-stopped
+    tmpfs:
+      - /run
+      - /tmp
     volumes:
       - /var/lib/plexmediaserver:/config
       - /mnt/storage/Media:/data
-  flexget:
-    image: pfragoso/docker-flexget
-    container_name: flexget
-    volumes:
-      - ~/.flexget/:/home/flexget/.flexget
+  plexpy:
+    image: jkaberg/docker-plexpy
+    container_name: plexpy
     restart: unless-stopped
-  emby:
-    image: dperson/emby
-    container_name: emby
-    environment:
-      - TZ=GMT
     volumes:
-      - /etc/emby:/config
-      - /mnt/storage/Media:/media
+      - /var/lib/plexpy:/var/lib/plexpy
     ports:
-      - "8096:8096"
-      - "8920:8920"
-    restart: unless-stopped
+      - "8282:8181"
   sickbeard:
     image: timhaak/sickbeard
     container_name: sickbeard
+    user: "1000"
     volumes:
       - /etc/sickbeard:/config
       - /mnt/storage:/data
@@ -51,23 +35,31 @@ services:
   sync:
     image: bittorrent/sync
     container_name: sync
+    user: "1000"
     restart: unless-stopped
     volumes:
       - /var/lib/btsync:/mnt/sync
-      - /mnt/storage:/mnt/mounted_folders/storage
+      - /home/jonathan/btsync:/mnt/mounted_folders/storage
     ports:
       - "8888:8888"
       - "55555"
+  flexget:
+    image: pfragoso/docker-flexget
+    container_name: flexget
+    user: "1000"
+    volumes:
+      - ~/.flexget/:/home/flexget/.flexget
+    restart: unless-stopped
   transmission:
-    image: elventear/transmission
+    image: dperson/transmission
     container_name: transmission
     environment:
-      - ADMIN_PASS=$TRANSMISSION_PASS
+      - TRPASSWD=$TRANSMISSION_PASS
+      - USERID=1000
     volumes:
       - /mnt/storage/Torrents:/var/lib/transmission-daemon/downloads
       - /mnt/storage/Incomplete:/var/lib/transmission-daemon/incomplete
+      - /etc/transmission-daemon:/var/lib/transmission-daemon/info
     ports:
-      - "12345:12345"
-      - "12345:12345/udp"
-      - "0.0.0.0:9091:9091"
-    restart: unless-stopped
+    - 0.0.0.0:12345:12345/tcp
+    - 0.0.0.0:12345:12345/udp

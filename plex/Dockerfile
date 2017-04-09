@@ -1,6 +1,8 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 MAINTAINER Jonathan Cremin <jonathan@crem.in>
+
+ARG VERSION="1.5.3.3580-4b377d295"
 
 ENV DEBIAN_FRONTEND="noninteractive" \
     TERM="xterm"
@@ -8,9 +10,8 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup &&\
   echo "Acquire::http {No-Cache=True;};" > /etc/apt/apt.conf.d/no-cache && \
   apt-get update && \
-  apt-get install -y wget jq && \
-  VERSION=$(wget -qO- https://tools.linuxserver.io/latest-plexpass.json | jq -r .version) && \
-  cd tmp; wget "https://downloads.plex.tv/plex-media-server/$VERSION/plexmediaserver_${VERSION}_amd64.deb" && \
+  apt-get install -y curl jq && \
+  cd tmp; curl -O "https://downloads.plex.tv/plex-media-server/$VERSION/plexmediaserver_${VERSION}_amd64.deb" && \
   dpkg -i plexmediaserver_${VERSION}_amd64.deb && \
   apt-get -y remove wget && \
   apt-get -y autoremove && \
@@ -20,7 +21,7 @@ RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup &&\
 
 VOLUME ["/config","/data"]
 
-ADD ./start.sh /start.sh
+COPY start.sh /start.sh
 RUN chmod u+x  /start.sh
 
 ENV RUN_AS_ROOT="true" \

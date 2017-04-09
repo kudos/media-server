@@ -2,7 +2,6 @@ sudo apt-get update
 sudo apt-get install samba netatalk avahi-daemon avahi-utils slurm cryptsetup htop bwm-ng samba git smartmontools fail2ban zsh
 curl -fsSL https://get.docker.com/ | sh
 sudo usermod -aG docker jonathan
-sudo cryptsetup luksOpen /dev/md0
 sudo cryptsetup luksOpen /dev/md0 storage
 sudo mkdir /mnt/storage
 sudo mount /dev/mapper/storage /mnt/storage
